@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Listening Lesson on Short English Sentences</title>
+<script>
+var question = new Array();         //　問題 
+var num,index;　　　　　　　 //　問題番号、解答インデックス
+var cnt,timer = null;                     //　カウンタ、タイマー
+var score,status = "ready";　　  //　スコア、ステータス（ready/select）
+
+//　問題データ
+question[0] = ["Good morning.","Good afternoon.","Good evening."];
+question[1] = ["I have a pen.","I have an apple.","I have a pineapple."];
+question[2] = ["This is a book.","That is a book.","This is a notebook."];
+question[3] = ["There is a lemon.","Here is a lemon.","There are two lemons."];
+question[4] = ["I speak English.","I can speak English.","I can't speak English."];
+question[5] = ["He studies English.","She studies English.","They study English."];
+question[6] = ["I go to Kyoto.","I went to Kyoto.","I'll go to Kyoto."];
+question[7] = ["Can I help you?","May I help you?","Can you help me?"];
+question[8] = ["How are you?","How about you?","Who are you?"];
+question[9] = ["What do you think?","What do you mean?","What do you do?"];
+question[10] = ["Where are you going?","What are you doing?","What time is it?"];
+question[11] = ["I think so.","I don't know.","I hope so."];
+question[12] = ["I like you.","I don't like you.","I love you."];
+question[13] = ["Really?","Exactly.","I see."];
+question[14] = ["Let's go.","Let it go.","Let it be."];
+question[15] = ["I will get it done.","I won't get it done.","I would get it done."];
+
+function startLesson() {
+     //　問題をシャッフル
+     for (var  i=question.length-1;  i>0;  i--)  {
+            var  j = Math.floor(Math.random()*i);
+            //　要素の入れ換え
+           var temp = question[j];
+           question[j] = question[i]
+           question[i] = temp;
+    }
+    //　スタート
+    cnt = 0;
+    num = 0;
+    score = 0;
+    status = "ready";
+    document.getElementById("score").innerText = score;
+    document.getElementById("countDown").innerHTML = "--";
+    if (timer !=null) clearInterval(timer);
+    timer = setInterval(countDown, 1000);
+}
+
+function countDown() {
+      //　カウントダウン表示
+      var cntText = "--";
+      if (cnt > 0) cntText = cnt;
+      document.getElementById("countDown").innerHTML = cntText;
+      cnt--;
+      if (cnt < 0) {
+          if (num < 10) {
+              //　問題番号を表示
+              document.getElementById("num").innerHTML = num  + 1;
+              //　正解／不正解メッセージをクリア
+              document.getElementById("message").innerText = "";
+              //　問題をセット
+              for (var i=0; i<3; i++) {
+                  var answer = document.getElementById("a_" + i);
+                  answer.innerText = question[num][i];
+                  answer.classList.remove("select");
+                  }
+                  status = "select";
+                  index = Math.floor(Math.random() * 3);
+                  //　英文を発声
+                  speech(question[num][index]);
+                  //　問題番号、カウンタを更新
+                  num++;
+                  cnt = 5;
+          } else {
+                 //　終了
+                 clearInterval(timer);
+                 //　評価
+                 var message = "Bad!"
+                 if (score > 8)  {
+                     message = "Excellent!!";
+                 }  else if (score > 6) {
+                       message = "Great!";
+                 } else if (score > 4)  {
+                     message = "Good!";
+                 } else if (score > 2)   {
+                      message = "Poor!";
+                 }
+                 //　評価を発声
+                 speech(message);
+                 document.getElementById("message").innerText = message;
+          }
+      }
+}
+
+function speech(text)  {
+     //　発声のキャンセル
+     window.speechSynthesis.cancel();
+     //　テキスト、言語をセット
+     var utterance = new SpeechSynthesisUtterance();
+     utterance.text = text;
+     utterance.lang = "en-US";
+     //　発声
+     window.speechSynthesis.speak(utterance);
+}
+
+function checkAnswer(n)  {
+     //　解答チェック
+     if (status == "select")  {
+        status = "ready";
+        document.getElementById("a_" + n).classList.add("select");
+        var message = "Wrong!";
+        if (n == index)  {
+            score++;
+            message = "Correct!";
+        }
+        //正解／不正解を発声
+        speech(message);
+        document.getElementById("message").innerText = message;
+        document.getElementById("score").innerText = score;
+     }
+}
+</script>
+<style>
+#answer {font-size:  20px;}
+button  {
+      font-size:  20px;
+      width:  40px;
+      height:  40px;
+      margin: 5px  10px;
+}
+#message {color: #FF0000;}
+.select {color: #0000FF;}
+</style>
+</head>
+<body>
+<p>Listening Lesson on Short English Sentences</p>
+<input type="button" value="Start" onclick="startLesson()">
+Correct Answers: <span id="score">--</span>/10　Remaining: <span  id="countDown">--</span> seconds
+<hr>
+Lesson <span id="num">--</span>   <span id="message"></span><br>
+<div id="answer">
+<button onclick="checkAnswer(0)">1</button><span id="a_0">-------</span><br>
+<button onclick="checkAnswer(1)">2</button><span id="a_1">-------</span><br>
+<button onclick="checkAnswer(2)">3</button><span id="a_2">-------</span>
+</div>
+</body>
+</html>
